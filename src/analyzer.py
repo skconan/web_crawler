@@ -17,9 +17,9 @@ class Analyzer:
         self.url_prefix = ['http://', 'https://']
         self.url_posfix = ['ku.ac.th']
 
-    def result(self, boolean=False, result='-'):
-        print(boolean, result)
-        print('+++++++')
+    def result(self, boolean=False, result=''):
+        # print(boolean, result)
+        
         return [boolean, result]
 
     def link_parser(self, raw_html):
@@ -63,7 +63,7 @@ class Analyzer:
     def get_html(self, url):
         for posfix in self.url_posfix:
             if posfix in url:
-                    html = url.split(posfix)[1]
+                html = url.split(posfix)[1]
                 if '.html' in url:
                     html = html.split('.html')[0] + '.html'
                     return self.result(True, html)
@@ -75,11 +75,9 @@ class Analyzer:
     def url_normalization(self, base_url, link):
         return urljoin(base_url, link)
 
-    def endwith_slash(self, text):
-        return text + ('/' * (int(text.endswith('/')) ^ 1))
 
     def get_robot(self, hostname):
-        hostname = self.endwith_slash(hostname)
+        hostname = endwith_slash(hostname)
         try:
             req = urllib.request.urlopen(hostname + "robots.txt", data=None)
             data = io.TextIOWrapper(req, encoding='utf-8')
@@ -88,7 +86,7 @@ class Analyzer:
             return self.result()
 
     def get_sitemap(self, hostname):
-        hostname = self.endwith_slash(hostname)
+        hostname = endwith_slash(hostname)
         try:
             req = urllib.request.urlopen(hostname + "sitemap.xml", data=None)
             data = io.TextIOWrapper(req, encoding='utf-8')
@@ -105,13 +103,13 @@ if __name__ == '__main__':
     urls = al.link_parser(text)
     # print(urls)
     for url in urls:
-        print('1=-----------')
-        print(url)
-        res = al.get_suddirectory(url)
-        print('2=-----------')
-        print(res[0])
-        print(res[1])
-        print('3=-----------')
+        # print('1=-----------')
+        # print(url)
+        res = al.get_html(url)
+        # print('2=-----------')
+        if(res[0]):
+            print(res[1])
+        # print('3=-----------')
     # print(len(urls))
     # print(al.get_robot('http://reddit.com')[0])
     # print(al.get_robot('http://google.co.th/')[0])
