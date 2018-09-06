@@ -8,6 +8,7 @@
 from urllib.parse import urljoin
 from downloader import Downloader
 from bs4 import BeautifulSoup
+from lib import *
 import urllib.request
 import io
 
