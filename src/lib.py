@@ -8,6 +8,10 @@
 import time
 
 
+def endwith_slash(text):
+    return text + ('/' * (int(text.endswith('/')) ^ 1))
+
+
 def alert(msg='', delay_time=0, sound=False):
     for i in range(3):
         print('!! ' + msg + ' !!')
