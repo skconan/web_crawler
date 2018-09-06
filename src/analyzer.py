@@ -14,7 +14,13 @@ import io
 
 class Analyzer:
     def __init__(self):
-        pass
+        self.url_prefix = ['http://', 'https://']
+        self.url_posfix = ['ku.ac.th']
+
+    def result(self, boolean=False, result='-'):
+        print(boolean, result)
+        print('+++++++')
+        return [boolean, result]
 
     def link_parser(self, raw_html):
         urls = []
@@ -37,41 +43,77 @@ class Analyzer:
                 break
         return urls
 
+    def get_hostname(self, url):
+        hostname = ''
+        for prefix in self.url_prefix:
+            if prefix in url:
+                for posfix in self.url_posfix:
+                    if posfix in url:
+                        hostname = url.split(prefix)[0]
+                        print(hostname)
+                        print(1)
+                        # if hostname == 'ku.ac.th':
+                        #     return self.result(True, hostname)
+                        hostname = hostname.split(posfix)[0] + posfix
+                        print(2)
+                        print(hostname)
+                        return self.result(True, hostname)
+        return self.result()
+
+    def get_suddirectory(self, url):
+        for posfix in self.url_posfix:
+            if posfix in url:
+                    html = url.split(posfix)[1]
+                if '.html' in url:
+                    html = html.split('.html')[0] + '.html'
+                    return self.result(True, html)
+                elif 'htm' in url:
+                    html = html.split('.htm')[0] + '.htm'
+                    return self.result(True, html)
+        return self.result()
+
     def url_normalization(self, base_url, link):
         return urljoin(base_url, link)
 
-    def endwith_slash(self, url):
-        return url + ('/' * (int(url.endswith('/')) ^ 1))
+    def endwith_slash(self, text):
+        return text + ('/' * (int(text.endswith('/')) ^ 1))
 
     def get_robot(self, hostname):
         hostname = self.endwith_slash(hostname)
-        print(hostname)
         try:
             req = urllib.request.urlopen(hostname + "robots.txt", data=None)
             data = io.TextIOWrapper(req, encoding='utf-8')
-            return [True, data.read()]
+            return self.result(True, data.read())
         except:
-            return [False, '']
+            return self.result()
 
     def get_sitemap(self, hostname):
         hostname = self.endwith_slash(hostname)
         try:
             req = urllib.request.urlopen(hostname + "sitemap.xml", data=None)
             data = io.TextIOWrapper(req, encoding='utf-8')
-            return [True, data.read()]
+            return self.result(True, data.read())
         except:
-            return [False, '']
+            return self.result()
 
 
 if __name__ == '__main__':
     dl = Downloader()
-    text = dl.get_page('http://www.ku.ac.th/web2012/')
+    text = dl.get_page('http://www.ku.ac.th/web2012/')[1]
     print(text)
     al = Analyzer()
     urls = al.link_parser(text)
-    print(urls)
-    print(len(urls))
-    print(al.get_robot('http://reddit.com')[0])
-    print(al.get_robot('http://google.co.th/')[0])
-    print(al.get_sitemap('http://reddit.com')[0])
-    print(al.get_sitemap('http://google.co.th/')[0])
+    # print(urls)
+    for url in urls:
+        print('1=-----------')
+        print(url)
+        res = al.get_suddirectory(url)
+        print('2=-----------')
+        print(res[0])
+        print(res[1])
+        print('3=-----------')
+    # print(len(urls))
+    # print(al.get_robot('http://reddit.com')[0])
+    # print(al.get_robot('http://google.co.th/')[0])
+    # print(al.get_sitemap('http://reddit.com')[0])
+    # print(al.get_sitemap('http://google.co.th/')[0])
