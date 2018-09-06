@@ -31,15 +31,27 @@ class Analyzer:
     def url_normalization(self, base_url, link):
         return urljoin(base_url, link)
 
+    def endwith_slash(self,url):
+        return url + ('/'*(int(url.endswith('/')) ^ 1))
+
     def get_robot(self, hostname):
+        hostname = self.endwith_slash(hostname)
+        print(hostname)
         try:
-            req = urllib.request.urlopen(hostname+"/robots.txt",data=None)
+            req = urllib.request.urlopen(hostname+"robots.txt",data=None)
             data = io.TextIOWrapper(req, encoding='utf-8')
             return [True, data.read()]
         except:
             return [False, '']
 
-        
+    def get_sitemap(self, hostname):
+        hostname = self.endwith_slash(hostname)
+        try:
+            req = urllib.request.urlopen(hostname+"sitemap.xml",data=None)
+            data = io.TextIOWrapper(req, encoding='utf-8')
+            return [True, data.read()]
+        except:
+            return [False, '']
 
 if __name__ == '__main__':
     dl = Downloader()
@@ -49,5 +61,7 @@ if __name__ == '__main__':
     urls = al.link_parser(text)
     print(urls)
     print(len(urls))
-    print(al.get_robot('http://reddit.com')[1])
-    print(al.get_robot('http://google.co.th')[1])
+    print(al.get_robot('http://reddit.com')[0])
+    print(al.get_robot('http://google.co.th/')[0])
+    print(al.get_sitemap('http://reddit.com')[0])
+    print(al.get_sitemap('http://google.co.th/')[0])
