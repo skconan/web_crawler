@@ -7,5 +7,8 @@
 
 PATH_PROJECT = r'C:\Users\skconan\Desktop\Workspace\web_crawler' 
 PATH_HTML = PATH_PROJECT+r'\html'
-PATH_ROBOT = PATH_PROJECT+r'\list_robots.txt'
-PATH_SITEMAP = PATH_PROJECT+r'\list_sitemap.txt'
+PATH_TXT = PATH_PROJECT+r'\txt'
+PATH_ROBOT = PATH_TXT+r'\list_robots.txt'
+PATH_SITEMAP = PATH_TXT+r'\list_sitemap.txt'
+PATH_FRONTIER = PATH_TXT+r'\list_frontier.txt'
+PATH_VISITED = PATH_TXT+r'\list_visited.txt'
