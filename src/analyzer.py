@@ -60,7 +60,7 @@ class Analyzer:
                         return self.result(True, hostname)
         return self.result()
 
-    def get_suddirectory(self, url):
+    def get_html(self, url):
         for posfix in self.url_posfix:
             if posfix in url:
                     html = url.split(posfix)[1]
