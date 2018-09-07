@@ -6,7 +6,7 @@
 '''
 
 import requests
-
+from bs4 import BeautifulSoup
 
 class Downloader:
     def __init__(self):
@@ -20,7 +20,8 @@ class Downloader:
         try:
             r = requests.get(url, headers=self.headers, timeout=2)
             text = r.text
-            return [True, text]
+            soup = BeautifulSoup(text).encode("utf-8")
+            return [True, soup]
         except:
             return [False, '']
 
