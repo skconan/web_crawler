@@ -46,24 +46,28 @@ class Recoder():
          
 
     def record_html(self, url):
-        # text = self.downloader.get_page(url)
-        # hostname = self.analyzer.get_hostname(url)
+        text = self.downloader.get_page(url)[1]
+        hostname = self.analyzer.get_hostname(url)[1]
         html = self.analyzer.get_html(url)
         if not html[0]:
             alert('Analyzer::get_html Error',5)
         else:
             html = html[1]
-            
+        print(html)
         current_path = CONST.PATH_HTML
         list_dir_expected = self.get_subdirectory(html)
+        list_dir_expected = [hostname] + list_dir_expected
+
         list_dir_current = os.listdir(current_path)
-        
+        print(list_dir_expected)
         for dir_expected in list_dir_expected:
-            current_path = endwith_slash(current_path) + dir_expected
+            current_path = endwith_backslash(current_path) + dir_expected
             if not dir_expected in list_dir_current:
+                print('-',dir_expected,'=',list_dir_current)
                 os.makedirs(current_path)
             list_dir_current = os.listdir(current_path)
-
+        abs_path = endwith_backslash(CONST.PATH_HTML) + slash2backslash(hostname + html)
+        f = self.writer(abs_path,str(text))
         self.count += 1
 
 if __name__ == '__main__':
@@ -71,4 +75,4 @@ if __name__ == '__main__':
 
     # r.record_count(11)
     # r.get_count()
-    r.record_html('www.ku.ac.th/a/b/c/e.html')
+    r.record_html('https://offic.src.ku.ac.th/rub_tong.html')
