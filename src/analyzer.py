@@ -50,7 +50,7 @@ class Analyzer:
             if prefix in url:
                 for posfix in self.url_posfix:
                     if posfix in url:
-                        hostname = url.split(prefix)[0]
+                        hostname = url.split(prefix)[1]
                         print(hostname)
                         print(1)
                         # if hostname == 'ku.ac.th':
