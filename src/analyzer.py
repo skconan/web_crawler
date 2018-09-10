@@ -19,9 +19,23 @@ class Analyzer:
         self.url_posfix = ['ku.ac.th']
 
     def result(self, boolean=False, result=''):
-        # print(boolean, result)
-        
         return [boolean, result]
+
+    def filter_link(self,link):
+        word_filter = ['.php','.pdf','.jpg','.jpeg','.png','.gif','.rar','.mp3','mp4']
+        if 'ku.ac.th' in link:
+            for w in word_filter:
+                if w in link:
+                    return False
+            return True
+        else:
+            return False
+    
+    def fix_link(self, link):
+        remove_text = [':8000',':8080']
+        for txt in remove_text:
+            link = link.replace(txt,'')
+        return link
 
     def link_parser(self, raw_html):
         urls = []
@@ -37,7 +51,8 @@ class Analyzer:
                 end = raw_html.find(pattern_end, start)
                 link = raw_html[start:end]
                 if len(link) > 0:
-                    if link not in urls:
+                    if link not in urls and self.filter_link(link):
+                        link = self.fix_link(link)
                         urls.append(link)
                 index = end
             else:
@@ -51,13 +66,7 @@ class Analyzer:
                 for posfix in self.url_posfix:
                     if posfix in url:
                         hostname = url.split(prefix)[1]
-                        print(hostname)
-                        print(1)
-                        # if hostname == 'ku.ac.th':
-                        #     return self.result(True, hostname)
                         hostname = hostname.split(posfix)[0] + posfix
-                        print(2)
-                        print(hostname)
                         return self.result(True, hostname)
         return self.result()
 
@@ -98,11 +107,11 @@ class Analyzer:
 
 if __name__ == '__main__':
     dl = Downloader()
-    text = dl.get_page('http://www.ku.ac.th/web2012/')[1]
+    text = dl.get_page('http://www.ku.ac.th/')[1]
     print(text)
     al = Analyzer()
     urls = al.link_parser(text)
-    # print(urls)
+    print(urls)
     for url in urls:
         # print('1=-----------')
         # print(url)
