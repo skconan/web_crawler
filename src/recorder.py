@@ -9,80 +9,118 @@ import constants as CONST
 from downloader import Downloader
 from analyzer import Analyzer
 from lib import *
+import json
 import os
-import codecs
+
 
 class Recoder():
     def __init__(self):
-        self.count = self.get_count()
+        self.count = 0
         self.analyzer = Analyzer()
         self.downloader = Downloader()
 
-    def get_count(self):
-        f = codecs.open(CONST.PATH_COUNT, 'r', 'utf-8')
-        line = f.readlines()
-        return int(line[0])
+    def read_count(self):
+        line = reader(CONST.PATH_COUNT)
+        self.count = int(line[0])
 
     def counting(self):
         self.count += 1
-
-        if not self.count % 10:
-            self.record_count(self.count)
-
-    def writer(self, file_path='', data='', mode='replace'):
-        if file_path == '':
-            return False
-        if mode == 'replace':
-            f = codecs.open(file_path, 'w+', 'utf-8')
-        elif mode == 'append':
-            f = codecs.open(file_path, 'a+', 'utf-8')
-
-        f.write(data)
-        f.close()
-        return True
-
-    def record_count(self, count):
-        if not self.writer(CONST.PATH_COUNT, str(count)):
-            alert('Cannot record # of html '+str(count))
+        self.record_count(self.count)
 
     def get_subdirectory(self, url):
-        return url.split('/')[1:-1]
-         
+
+        url = url.lower()
+        url = url.replace('//','/')
+        url = url.replace('\n','')
+        url = url.replace('?','/')
+        url = url.replace('=','/')
+        return url.split('/')[1:]
 
     def record_html(self, url):
-        text = self.downloader.get_page(url)[1]
-        hostname = self.analyzer.get_hostname(url)[1]
-        html = self.analyzer.get_html(url)
-        if not html[0]:
-            alert('Analyzer::get_html Error')
-        else:
-            html = html[1]
-            print(html)
-            current_path = CONST.PATH_HTML
-            list_dir_expected = self.get_subdirectory(html)
-            list_dir_expected = [hostname] + list_dir_expected
+        # https://www.livenation.co.uk/event/allevents?page=2
+        # https://www.livenation.co.uk/show/1058621/the-australian-pink-floyd-show-time-30-years-of-celebrating-pink-floyd/guildford/2018-11-19/en
+        filename = ""
 
+        if url.find('allevents?') > 0:
+            filename = 'allevents_page_'+ url.split('=')[1]  +'.html'
+        elif url.find('allevents') > 0:
+            filename = 'allevents_page_1.html'
+            url = "https://www.livenation.co.uk/event/allevents?page=1"
+        else:
+            # filename = url.split('/')[5]+'.html'
+            filename = 'detail.html'
+            self.record_log_json(url)
+
+        text = self.downloader.get_page(url)[1]
+      
+        current_path = CONST.PATH_HTML.replace('~','')
+        
+        hostname = self.analyzer.get_hostname(url)[1]
+        print("host:",hostname)
+        list_dir_expected = self.get_subdirectory(url)
+        list_dir_expected = [hostname] + list_dir_expected
+        
+        list_dir_current = os.listdir(current_path)
+        list_dir_expected = list_dir_expected[1:]
+        print("list_dir_expected:",list_dir_expected)
+        for dir_expected in list_dir_expected:
+            current_path = endwith_backslash(current_path) + dir_expected
+            if not dir_expected in list_dir_current:
+                
+                os.makedirs(current_path)
+            print('current path',current_path)
             list_dir_current = os.listdir(current_path)
-            print(list_dir_expected)
-            for dir_expected in list_dir_expected:
-                current_path = endwith_backslash(current_path) + dir_expected
-                if not dir_expected in list_dir_current:
-                    print('-',dir_expected,'=',list_dir_current)
-                    os.makedirs(current_path)
-                list_dir_current = os.listdir(current_path)
-            abs_path = endwith_backslash(CONST.PATH_HTML) + slash2backslash(hostname + html)
-            f = self.writer(abs_path,str(text))
-            self.counting()
-    
+        
+        path1 = ''
+        for i in list_dir_expected:
+            path1 += '\\' + i
+        abs_path = CONST.PATH_HTML + path1
+        # print
+        print(filename)
+        # print(abs_path.replace('\','))
+        f = writer(abs_path+'\\'+filename, str(text))
+        self.counting()
+
+    def record_count(self, count):
+        writer(CONST.PATH_COUNT, str(count))
+
     def record_robot(self, url):
-        self.writer(CONST.PATH_ROBOT, str(url), mode='append')
+        writer(CONST.PATH_ROBOT, str(url)+'\n', mode='append')
 
     def record_sitemap(self, url):
-        self.writer(CONST.PATH_SITEMAP, str(url), mode='append')
+        writer(CONST.PATH_SITEMAP, str(url)+'\n', mode='append')
+
+    def record_frontier(self, url):
+        writer(CONST.PATH_FRONTIER, str(url)+'\n', mode='append')
+
+    def record_visited(self, url):
+        writer(CONST.PATH_VISITED, str(url)+'\n', mode='append')
+    
+    def record_log_json(self,url):
+        # https://www.livenation.co.uk/show/1085415/stewart-francis-into-the-punset-/worthing/2018-11-20/en
+        url_tmp = url
+        url = url.split('/')
+        data = {
+            "url": url_tmp,
+            "concert_name" : url[5],
+            "city" : url[6],
+            "date": url[7],
+        }
+        writer(CONST.PATH_LOG, json.dumps(data)+'\n', mode='append')
+
+    def new_file(self):
+        writer(CONST.PATH_ROBOT, str(''))
+        writer(CONST.PATH_SITEMAP, str(''))
+        writer(CONST.PATH_FRONTIER, str(''))
+        writer(CONST.PATH_VISITED, str(''))
+        writer(CONST.PATH_COUNT, str(''))
+        writer(CONST.PATH_LOG, str(''))
+
 
 if __name__ == '__main__':
-    r = Recoder()
+    # r = Recoder()
 
-    # r.record_count(11)
-    # r.get_count()
-    r.record_html('https://offic.src.ku.ac.th/rub_tong.html')
+    # # r.record_count(11)
+    # # r.read_count()
+    # r.record_html('https://offic.src.ku.ac.th/rub_tong.html')
+    pass

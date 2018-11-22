@@ -6,7 +6,9 @@
 '''
 
 import requests
+from html.parser import HTMLParser
 from bs4 import BeautifulSoup
+
 
 class Downloader:
     def __init__(self):
@@ -17,16 +19,19 @@ class Downloader:
 
     def get_page(self, url):
         text = ''
+        h = HTMLParser()
         try:
             r = requests.get(url, headers=self.headers, timeout=2)
             text = r.text
-            soup = BeautifulSoup(text).encode("utf-8")
-            return [True, soup]
+            text = h.unescape(text)
+            return [True, text]
+        except(KeyboardInterrupt, SystemExit):
+            raise
         except:
             return [False, '']
 
 
 if __name__ == '__main__':
     dl = Downloader()
-    text = dl.get_page('http://www.ku.ac.th/web2012/')
+    text = dl.get_page('https://www.livenation.co.uk/event/allevents')
     print(text)
