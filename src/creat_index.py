@@ -77,39 +77,34 @@ def search(es_object, index_name, search):
     res = es_object.search(index=index_name, body=search)
     print(res)
 
+if __name__ =='__main__':
+    connect_elasticsearch()
+    create_index(es, 'concert')
 
-connect_elasticsearch()
-create_index(es, 'concert')
+    # data = {"url": "https://www.livenation.co.uk/show/1103135/paul-foot-image-conscious/colchester/2019-05-16/en\n",
+    #         "concert_name": "paul-foot-image-conscious", "city": "colchester", "date": "2019-05-16"}
+    data ={"url": "https://www.livenation.co.uk/show/1072892/the-mersey-beatles-get-back-the-2018-uk-tour/lydney/2018-11-21/en\n", "concert_name": "the-mersey-beatles-get-back-the-2018-uk-tour", "city": "lydney", "date": "2018-11-21"}
+    
+    store_record(es, "concert", data)
 
-# data = {"url": "https://www.livenation.co.uk/show/1103135/paul-foot-image-conscious/colchester/2019-05-16/en\n",
-#         "concert_name": "paul-foot-image-conscious", "city": "colchester", "date": "2019-05-16"}
-data ={"url": "https://www.livenation.co.uk/show/1072892/the-mersey-beatles-get-back-the-2018-uk-tour/lydney/2018-11-21/en\n", "concert_name": "the-mersey-beatles-get-back-the-2018-uk-tour", "city": "lydney", "date": "2018-11-21"}
- 
-store_record(es, "concert", data)
-# search_object = {"explain": True, 'query': {
-#     'match': {'concert_name': 'paul-foot-image-conscious'}}}
-# print()
-# search_object = {"explain": True, 'query': {'multi_match': {
-#     "query": 'paul-foot-image-conscious colchester', "fields": ['concert_name', 'city']}}}
-print()
-search_object = {
-    "query": {
-        "bool": {
-            "must": [
-                {
-                    "match": {
-                        "concert_name": "paul-foot-image-conscious"
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match": {
+                            "concert_name": "paul-foot-image-conscious"
+                        }
+                    },
+                    {
+                        "match": {
+                            
+                                "city": "colchester"
+                            
+                        }
                     }
-                },
-                {
-                    "match": {
-                        
-                            "city": "colchester"
-                        
-                    }
-                }
-            ]
+                ]
+            }
         }
     }
-}
-search(es, 'concert', json.dumps(search_object))
+    search(es, 'concert', json.dumps(search_object))

@@ -83,13 +83,7 @@ class Recoder():
 
     def record_count(self, count):
         writer(CONST.PATH_COUNT, str(count))
-
-    def record_robot(self, url):
-        writer(CONST.PATH_ROBOT, str(url)+'\n', mode='append')
-
-    def record_sitemap(self, url):
-        writer(CONST.PATH_SITEMAP, str(url)+'\n', mode='append')
-
+   
     def record_frontier(self, url):
         writer(CONST.PATH_FRONTIER, str(url)+'\n', mode='append')
 
@@ -109,18 +103,16 @@ class Recoder():
         writer(CONST.PATH_LOG, json.dumps(data)+'\n', mode='append')
 
     def new_file(self):
-        writer(CONST.PATH_ROBOT, str(''))
-        writer(CONST.PATH_SITEMAP, str(''))
         writer(CONST.PATH_FRONTIER, str(''))
         writer(CONST.PATH_VISITED, str(''))
         writer(CONST.PATH_COUNT, str(''))
         writer(CONST.PATH_LOG, str(''))
 
 
-if __name__ == '__main__':
-    # r = Recoder()
+# if __name__ == '__main__':
+#     # r = Recoder()
 
-    # # r.record_count(11)
-    # # r.read_count()
-    # r.record_html('https://offic.src.ku.ac.th/rub_tong.html')
-    pass
+#     # # r.record_count(11)
+#     # # r.read_count()
+#     # r.record_html('https://offic.src.ku.ac.th/rub_tong.html')
+#     pass

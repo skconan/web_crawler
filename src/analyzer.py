@@ -54,8 +54,7 @@ class Analyzer:
                 link = raw_html[start:end]
 
                 if len(link) > 0 and self.filter_link(link):
-                        # link = self.fix_link(link)
-                        urls.append(link)
+                    urls.append(link)
                 index = end
             else:
                 break
@@ -68,20 +67,15 @@ class Analyzer:
         hostname = url.split('//')[1].split('/')[0]
         return [True, hostname]
 
-    # def get_html(self, url):
-    #     return True, url 
-
     def url_normalization(self, base_url, link):
         return urljoin(base_url, link)
 
    
-
-
-if __name__ == '__main__':
-    dl = Downloader()
-    text = dl.get_page('https://www.livenation.co.uk/event/allevents')[1]
-    print(text)
-    al = Analyzer()
-    urls = al.link_parser(text)
-    print(urls)
+# if __name__ == '__main__':
+#     dl = Downloader()
+#     text = dl.get_page('https://www.livenation.co.uk/event/allevents')[1]
+#     print(text)
+#     al = Analyzer()
+#     urls = al.link_parser(text)
+#     print(urls)
    
