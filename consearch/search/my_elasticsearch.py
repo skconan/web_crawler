@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 import sys
 import json
 import time
+from operator import itemgetter
 
 
 class ElasticSearch():
@@ -27,21 +28,25 @@ class ElasticSearch():
                 "number_of_replicas": 0
             },
             "mappings": {
-                "webpage": {
+                self.doc_type: {
                     "dynamic": "strict",
                     "properites": {
                         "url": {
-                            "type": "keyword"
+                            "type": "keyword",
+
                         },
                         "concert_name": {
                             "type": "text",
+
+
                         },
                         "city": {
                             "type": "text",
+
                         },
-                        # "html": {
-                        #     "type": "text",
-                        # },
+                        "html": {
+                            "type": "text",
+                        },
                         "date": {
                             "type": "date",
                             "format": "yyyy-mm-dd"
@@ -67,36 +72,126 @@ class ElasticSearch():
             print('Error in indexing data')
             print(str(ex))
 
-    def search(self, concert_name="", city=""):
-        search_object = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "match": {
-                                "concert_name": str(concert_name)
-                            }
-                        },
-                        {
-                            "match": {
-                                "city": str(city)
-                            }
-                        }
-                    ]
+    # def search_by_date(self, start, end):
+    #     "range": {
+    #         "created": {
+    #             "gte": start,
+    #             "lte": end
+    #         }
+    #     }
+
+    def search(self, key=[], value=[], start_date="2018-01-01", end_date="2020-01-01"):
+        table_header = ['concert_name', 'city', 'date', 'url', 'score']
+        table_data = []
+        print(key)
+        print(value)
+        print(start_date)
+        print(end_date)
+        if len(key) == 0 or len(key) != len(value):
+            search_object = {
+                "query": {
+                    "match_all": {
+                        # key[0]: value[0]
+                    }
                 }
             }
-        }
-        res = self.es.search(index=self.index_name, body=search_object)
-        table_header = ['concert_name','city','date','url'] 
-        table_data = []
-        # {'_index': 'concert', '_type': 'webpage', '_id': 'AWc9g9YeADGmbvgB0CxZ', 
-        # '_score': 19.478054, 
-        # '_source': {'url': 'https://www.livenation.co.uk/show/1187472/only-girl/london/2018-11-20/en', 
+        elif len(key) == 1:
+            print("=========== 11 ==============")
+            search_object = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match": {
+                                    key[0]: value[0]
+                                }
+                            },
+                            {"range": {"date": {"gte": start_date, "lte": end_date}}}
+                        ],
+                        # "filter": {
+                        #     "range": {
+                        #         "date": {
+                        #             "gte": start_date,
+                        #             "lte": end_date,
+                        #             # "type": "date",
+                        #             "format": "yyyy-mm-dd"
+                        #         }
+                        #     }
+                        # }
+                    }
+
+
+                }
+            }
+        # elif
+        else:
+            # if ranking:
+            print(key, value)
+            print(start_date, end_date)
+            search_object = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match": {
+                                    key[0]: value[0]
+                                }
+                            },
+                            {
+                                "match": {
+                                    key[1]: value[1]
+                                }
+                            },
+
+                            {"range": {"date": {"gte": start_date, "lte": end_date}}}
+                        ]
+                    }
+
+
+                }
+            }
+            # else:
+            #     search_object = {
+            #         "query": {
+            #             "bool": {
+            #                 "should": [
+            #                     {
+            #                         "match": {
+            #                             key[0]: value[0]
+            #                         }
+            #                     },
+            #                     {
+            #                         "match": {
+            #                             key[1]: value[1]
+            #                         }
+            #                     }
+            #                 ]
+            #             }
+            #         }
+            #     }
+        res = self.es.search(index=self.index_name,
+                             body=search_object, size=200)
+
+        # {'_index': 'concert', '_type': 'webpage', '_id': 'AWc9g9YeADGmbvgB0CxZ',
+        # '_score': 19.478054,
+        # '_source': {'url': 'https://www.livenation.co.uk/show/1187472/only-girl/london/2018-11-20/en',
         # 'concert_name': 'only-girl', 'city': 'london', 'date': '2018-11-20'}}
+        # print(res['hits']['total'])
+        # print(res)
+        # print("Len",len(res['hits']['hits']))
         if len(res['hits']['hits']) > 0:
             for dct in res['hits']['hits']:
                 data = dct['_source']
-                table_data.append([data['concert_name'],data['city'],data['date'],data['url']])
+                score = dct['_score']
+                table_data.append(
+                    [data['concert_name'], data['city'], data['date'], data['url'], score])
+            # table_data_sorted = sorted(table_data,key=itemgetter(-1),reverse=True)
+            # if ranking:
+            #     for t in table_data_sorted:
+            #         table_data_new.append(t[:])
+            # else:
+            #     for t in table_data:
+            #         table_data_new.append(t[:])
         return table_header, table_data
 
         # print(res['hits']['hits'][0]['_source'])
@@ -108,8 +203,9 @@ if __name__ == '__main__':
     f = open(
         r"C:\Users\skconan\Desktop\web_crawler\consearch\search\log_webpage.txt", 'r')
     lines = f.readlines()
+    ct = 0
     for line in lines:
-        print(line)
+        print(ct)
+        # print(line)
         es.store_record(line)
-
-    # search(es, 'concert', json.dumps(search_object))
+        ct += 1

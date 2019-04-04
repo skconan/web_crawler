@@ -14,7 +14,7 @@
     </form>
 <br/>
 <br/>
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 {% for value in field.header %}
@@ -26,9 +26,13 @@
         <tbody>
             {% for value in field.rows %}
             <tr>
-                {% for col in value %}
-                <td>{{ col }}</td>
-                {% endfor %}
+                
+                <td>{{ value.0 }}</td>
+                <td>{{ value.1 }}</td>
+                <td>{{ value.2 }}</td>
+                <td><a href="{{ value.3 }}">more detail...</a></td>
+                <td>{{ value.4 }}</td>
+                
             </tr>
             {% endfor %}
         </tbody>
